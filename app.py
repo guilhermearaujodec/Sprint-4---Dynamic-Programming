@@ -148,6 +148,49 @@ def custo_iterativo_bottom_up(P: List[int]) -> int:
     # O resultado final está no canto superior direito (Módulo 1 até N)
     return dp[1][num_etapas]
 
+
+# -----------------------------------------------------
+# 🔍 NOVA FUNÇÃO: VERSÃO ITERATIVA COM RASTREAMENTO (SPLIT TABLE)
+# -----------------------------------------------------
+
+def custo_iterativo_com_rastreamento(P: List[int]) -> Tuple[int, List[List[int]]]:
+    """
+    Calcula o custo mínimo e registra a matriz SPLIT com os pontos ótimos de quebra.
+    Retorna:
+        - Custo mínimo total
+        - Matriz SPLIT (para reconstrução da parentização ótima)
+    """
+    num_etapas = len(P) - 1
+    dp = [[0 for _ in range(num_etapas + 1)] for _ in range(num_etapas + 1)]
+    split = [[0 for _ in range(num_etapas + 1)] for _ in range(num_etapas + 1)]
+
+    for L in range(2, num_etapas + 1):
+        for i in range(1, num_etapas - L + 2):
+            j = i + L - 1
+            dp[i][j] = INF
+
+            for k in range(i, j):
+                custo_interligacao = P[i - 1] * P[k] * P[j]
+                custo_atual = dp[i][k] + dp[k + 1][j] + custo_interligacao
+                if custo_atual < dp[i][j]:
+                    dp[i][j] = custo_atual
+                    split[i][j] = k  # ponto de divisão ótimo
+
+    return dp[1][num_etapas], split
+
+
+def reconstruir_agrupamento(i: int, j: int, split: List[List[int]]) -> str:
+    """
+    Reconstrói a parentização ótima (agrupamento) usando a matriz SPLIT.
+    """
+    if i == j:
+        return f"Etapa {i}"
+    k = split[i][j]
+    esquerda = reconstruir_agrupamento(i, k, split)
+    direita = reconstruir_agrupamento(k + 1, j, split)
+    return f"({esquerda} {direita})"
+
+
 # -----------------------------------------------------
 # VERIFICAÇÃO E EXECUÇÃO
 # -----------------------------------------------------
@@ -160,7 +203,7 @@ def verificar_e_executar_dp(P: List[int]):
         print("\nERRO: Pipeline não definida ou inválida. Defina as complexidades primeiro (Opção 1).")
         return
 
-    N = len(P) - 1 # Número de etapas de análise
+    N = len(P) - 1 
     
     print("\n" + "-" * 70)
     print("--- Otimizador de Pipeline de Visão Computacional (DP) ---")
@@ -188,13 +231,25 @@ def verificar_e_executar_dp(P: List[int]):
     print(f"[2] Custo Mínimo (Iterativa - Bottom-Up): {resultado_iter}")
     print(f"Tempo de execução: {time_iter:.4f} ms")
 
+    # 3. Nova versão com rastreamento (Split Table)
+    start_time = time.perf_counter()
+    resultado_split, split_table = custo_iterativo_com_rastreamento(P)
+    end_time = time.perf_counter()
+    time_split = (end_time - start_time) * 1000
+    agrupamento_otimo = reconstruir_agrupamento(1, N, split_table)
+
+    print(f"[3] Custo Mínimo (Com Rastreamento): {resultado_split}")
+    print(f"Agrupamento Ótimo: {agrupamento_otimo}")
+    print(f"Tempo de execução: {time_split:.4f} ms")
+
     # Verificação de Coerência
     print("\n" + "=" * 70)
-    if resultado_memo == resultado_iter:
-        print("✅ COERÊNCIA VERIFICADA: As duas abordagens de DP produziram o mesmo resultado.")
+    if resultado_memo == resultado_iter == resultado_split:
+        print("✅ COERÊNCIA VERIFICADA: Todas as abordagens produziram o mesmo resultado.")
     else:
         print("❌ ERRO: Resultados diferentes entre as abordagens!")
     print("=" * 70)
+
 
 # -----------------------------------------------------
 # INTERFACE DO USUÁRIO (MENU)
