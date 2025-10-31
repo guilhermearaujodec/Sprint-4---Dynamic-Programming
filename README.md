@@ -53,14 +53,14 @@ O projeto é executado através de uma **interface de menu no terminal**.
 ### 1. Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio-dp.git
-cd nome-do-projeto
+git clone https://github.com/guilhermearaujodec/Sprint-4---Dynamic-Programming.git
+cd Sprint-4---Dynamic-Programming
 ```
 
 ### 2. Execute o script Python:
 
 ```bash
-python dynamic_programming_vision_optimizer.py
+python app.py
 ```
 
 ### 3. Interface do Usuário
